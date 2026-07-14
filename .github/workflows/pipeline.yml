@@ -3,6 +3,7 @@ name: 🔐 Pipeline DevSecOps
 on:
   push:
     branches: [ "main" ]
+  workflow_dispatch: # Gatilho adicionado para disparo manual pelo GitHub
 
 permissions:
   contents: read
@@ -21,6 +22,8 @@ jobs:
       # ✅ PASSO 1: Já está pronto — Baixar o código
       - name: 📥 Checkout do Código
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Necessário para o Gitleaks varrer o histórico completo
 
       # ✅ PASSO 2: Já está pronto — Build
       - name: ⚙️ Build
