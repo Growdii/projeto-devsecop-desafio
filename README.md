@@ -1,37 +1,70 @@
-5. Documentar o funcionamento da pipeline neste README
+# Desafio DevSecOps | Gerenciador de Tarefas
 
-## O que implementar
-- [x] Secrets Scanning com **Gitleaks**
-- [x] SAST com **Semgrep**
-- [x] SCA com **Grype**
-- [x] Deploy com **GitHub Pages**
+## Sobre o Projeto
+Este repositório é o resultado do desafio prático do módulo de DevSecOps da **ADA Tech**. O projeto inicial continha vulnerabilidades propositais de segurança e uma pipeline de CI/CD incompleta. 
 
-## Como a pipeline funciona
+O objetivo central foi **projetar e implementar uma esteira de segurança automatizada**, garantindo que nenhum código vulnerável chegasse ao ambiente de produção.
 
-A esteira de DevSecOps automatizada é executada a cada push na branch `main`. Ela garante que nenhuma vulnerabilidade seja implantada em produção através do conceito de **"Break the Build"** (se qualquer gate de segurança falhar, o deploy é cancelado).
+## Objetivos Concluídos
+Neste desafio, as seguintes etapas foram realizadas com sucesso:
 
-Abaixo está o detalhamento de cada step:
+- [x] Implementação de steps de segurança no arquivo `pipeline.yml`.
+- [x] Configuração do **"Break the Build"** (falha automática da pipeline ao detectar ameaças).
+- [x] Correção de todas as vulnerabilidades apontadas pelas ferramentas.
+- [x] Pipeline executando com sucesso (100% verde).
+- [x] Documentação do fluxo de DevSecOps.
 
-1. **📥 Checkout do Código**:
-   - **O que faz**: Baixa o código-fonte do repositório para o runner (máquina virtual) do GitHub Actions.
-   - **Importância**: Necessário para que todas as ferramentas subsequentes possam ler os arquivos do projeto.
+---
 
-2. **⚙️ Build**:
-   - **O que faz**: Faz uma verificação preliminar da integridade e da existência dos arquivos estáticos dentro do diretório `src/`.
-   - **Importância**: Garante que a aplicação básica esteja estruturada e funcional antes de iniciar as análises de segurança.
+## Ferramentas de Segurança Implementadas
 
-3. **🔑 Secrets Scanning (Gitleaks)**:
-   - **O que faz**: Analisa o código em busca de segredos expostos hardcoded (chaves de API, senhas, tokens).
-   - **Importância**: Evita o vazamento de credenciais que poderiam comprometer outros sistemas. Corrigimos isso removendo constantes inseguras expostas como `API_KEY` e `DB_PASSWORD`.
+A esteira de DevSecOps é engatilhada automaticamente a cada *push* na branch `main`. Ela utiliza os seguintes validadores:
 
-4. **🔍 SAST - Semgrep (Static Application Security Testing)**:
-   - **O que faz**: Analisa o código-fonte de forma estática procurando por padrões perigosos e falhas lógicas conhecidas (OWASP Top 10).
-   - **Importância**: Identifica falhas no próprio código escrito. Corrigimos vulnerabilidades críticas detectadas por ele, como a injeção via `eval()` e vulnerabilidade XSS ao utilizar `innerHTML` sem sanitização, além de vazamento de informações com `err.stack`.
+*   **Gitleaks:** Verificação de segredos (*Secrets Scanning*).
+*   **Semgrep:** Análise Estática de Código (*SAST*).
+*   **Grype:** Análise de Composição de Software (*SCA*).
 
-5. **📦 SCA - Grype (Software Composition Analysis)**:
-   - **O que faz**: Analisa as dependências instaladas no projeto (no nosso caso, as bibliotecas no `package.json` como Axios, Express e Lodash) contra um banco de vulnerabilidades públicas conhecidas (CVEs).
-   - **Importância**: Garante que a aplicação não utilize bibliotecas de terceiros que possuam falhas conhecidas. Corrigimos isso atualizando as dependências para versões seguras (Axios `^1.18.1`, Express `^4.22.2`, Lodash `^4.18.1`).
+---
 
-6. **🚀 Deploy em Produção (GitHub Pages)**:
-   - **O que faz**: Configura e publica os arquivos estáticos da pasta `src/` no GitHub Pages.
-   - **Importância**: Só é executado se todos os steps anteriores passarem. Garante que apenas código validado e seguro chegue ao usuário final.
+## Como a Pipeline Funciona
+
+A esteira garante a integridade da aplicação através do conceito de **"Break the Build"**: se qualquer *gate* de segurança falhar, o processo de deploy é imediatamente cancelado. 
+
+Abaixo está o detalhamento de cada estágio da pipeline:
+
+### 1. Checkout do Código
+*   **O que faz:** Baixa o código-fonte do repositório para o *runner* do GitHub Actions.
+*   **Importância:** Etapa fundamental para que as ferramentas de análise tenham acesso aos arquivos do projeto.
+
+### 2. Build Preliminar
+*   **O que faz:** Realiza uma verificação da integridade e da existência dos arquivos estáticos no diretório `src/`.
+*   **Importância:** Assegura que a estrutura básica da aplicação está íntegra antes de consumir recursos com as análises de segurança.
+
+### 3. Secrets Scanning (Gitleaks)
+*   **O que faz:** Varre o histórico e o código atual em busca de credenciais *hardcoded*, como chaves de API, senhas e tokens.
+*   **Importância:** Previne o vazamento de segredos que poderiam dar acesso indevido a sistemas de terceiros ou bancos de dados.
+
+### 4. SAST (Semgrep)
+*   **O que faz:** Realiza a Análise Estática de Segurança do Código (*Static Application Security Testing*), buscando por falhas lógicas e padrões perigosos (ex: vulnerabilidades do OWASP Top 10).
+*   **Importância:** Identifica brechas criadas durante o desenvolvimento da aplicação, garantindo que o código escrito pela equipe seja seguro desde a origem.
+
+### 5. SCA (Grype)
+*   **O que faz:** Executa a Análise de Composição de Software (*Software Composition Analysis*), cruzando as dependências do `package.json` com bancos públicos de vulnerabilidades (CVEs).
+*   **Importância:** Evita que a aplicação herde falhas de segurança de bibliotecas ou pacotes de terceiros desatualizados.
+
+### 6. Deploy em Produção (GitHub Pages)
+*   **O que faz:** Publica os arquivos estáticos da pasta `src/` no GitHub Pages.
+*   **Importância:** É o estágio final. Só é alcançado se **todos** os testes anteriores passarem, garantindo que os usuários finais recebam um produto validado e livre de vulnerabilidades conhecidas.
+
+---
+
+## Vulnerabilidades Mitigadas
+
+Durante o processo de correção do código para fazer a pipeline passar, as seguintes melhorias de segurança foram aplicadas:
+
+*   **Proteção de Credenciais:** Remoção de constantes inseguras e segredos expostos diretamente no código (como `API_KEY` e `DB_PASSWORD`).
+*   **Prevenção contra Injeção de Código e XSS:** 
+    *   Substituição do uso perigoso da função `eval()`.
+    *   Sanitização de entradas ao manipular o DOM (remoção de `innerHTML` vulnerável).
+    *   Tratamento adequado de erros para evitar vazamento de informações sensíveis via `err.stack`.
+*   **Atualização de Dependências:** Atualização de bibliotecas vulneráveis para versões seguras (Axios `^1.18.1`, Express `^4.22.2` e Lodash `^4.18.1`).
